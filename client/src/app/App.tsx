@@ -45,9 +45,11 @@ export default function App() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <p className="text-sm uppercase tracking-[0.28em] text-cyan-100/80">
-                  Click a location on the globe to discover geospatial data
-                </p>
+                <div className="rounded-full border border-cyan-300/15 bg-slate-950/40 px-5 py-2 backdrop-blur-xl">
+  <p className="text-sm uppercase tracking-[0.28em] text-cyan-100/80">
+    Click a location on the globe to discover geospatial data
+  </p>
+</div>
               </motion.div>
             )}
 
@@ -72,7 +74,10 @@ export default function App() {
                 damping: 20,
               }}
             >
-              <RightDashboardPanel coordinates={selectedCoordinates} />
+              <RightDashboardPanel
+  coordinates={selectedCoordinates}
+  onClose={() => setSelectedCoordinates(null)}
+/>
             </motion.aside>
           )}
         </AnimatePresence>
