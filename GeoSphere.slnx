@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Project Path="GeoSphere.Api/GeoSphere.Api.csproj" />
+  <Project Path="Server/src/GeoSphere.Application/GeoSphere.Application.csproj" />
+  <Project Path="Server/src/GeoSphere.Domain/GeoSphere.Domain.csproj" />
+  <Project Path="Server/src/GeoSphere.Infrastructure/GeoSphere.Infrastructure.csproj" />
+</Solution>
