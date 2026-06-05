@@ -1,9 +1,12 @@
+using GeoSphere.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddInfrastructure();
 
 builder.Services.AddCors(options =>
 {

@@ -1,4 +1,5 @@
-﻿using GeoSphere.Application.DTOs.Weather;
+﻿using GeoSphere.Application.Abstractions.Weather;
+using GeoSphere.Application.DTOs.Weather;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeoSphere.Api.Controllers;
@@ -7,29 +8,28 @@ namespace GeoSphere.Api.Controllers;
 [Route("api/weather")]
 public sealed class WeatherController : ControllerBase
 {
+    private readonly IWeatherService _weatherService;
+
+    public WeatherController(IWeatherService weatherService)
+    {
+        _weatherService = weatherService;
+    }
+
     [HttpGet("current")]
-    public ActionResult<CurrentWeatherDto> GetCurrentWeather(
+    public async Task<ActionResult<CurrentWeatherDto>> GetCurrentWeather(
         [FromQuery] double lat,
-        [FromQuery] double lng)
+        [FromQuery] double lng,
+        CancellationToken cancellationToken)
     {
         if (!IsValidLatitude(lat) || !IsValidLongitude(lng))
         {
             return BadRequest("Latitude must be between -90 and 90. Longitude must be between -180 and 180.");
         }
 
-        var response = new CurrentWeatherDto
-        {
-            Latitude = lat,
-            Longitude = lng,
-            LocationName = "Mock Location",
-            TemperatureCelsius = 24.0,
-            FeelsLikeCelsius = 23.0,
-            HumidityPercentage = 65,
-            WindSpeedKmh = 15.0,
-            PressureHPa = 1012,
-            Condition = "Partly Cloudy",
-            RetrievedAtUtc = DateTimeOffset.UtcNow
-        };
+        var response = await _weatherService.GetCurrentWeatherAsync(
+            lat,
+            lng,
+            cancellationToken);
 
         return Ok(response);
     }
