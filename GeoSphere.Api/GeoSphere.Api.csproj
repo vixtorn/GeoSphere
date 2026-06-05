@@ -4,16 +4,15 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>cd "C:\Users\Emir Duman\source\repos\GeoSphere"</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Server\src\GeoSphere.Application\GeoSphere.Application.csproj" />
     <ProjectReference Include="..\Server\src\GeoSphere.Infrastructure\GeoSphere.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
   </ItemGroup>
 
 </Project>
