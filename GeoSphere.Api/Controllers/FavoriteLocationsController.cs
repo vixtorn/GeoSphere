@@ -92,6 +92,26 @@ public sealed class FavoriteLocationsController : ControllerBase
             response);
     }
 
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteFavoriteLocation(
+        [FromRoute] Guid id,
+        CancellationToken cancellationToken)
+    {
+        var favoriteLocation = await _dbContext.FavoriteLocations
+            .FirstOrDefaultAsync(location => location.Id == id, cancellationToken);
+
+        if (favoriteLocation is null)
+        {
+            return NotFound("Favorite location was not found.");
+        }
+
+        _dbContext.FavoriteLocations.Remove(favoriteLocation);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
+    }
+
     private static bool IsValidLatitude(double latitude)
     {
         return latitude >= -90 && latitude <= 90;
