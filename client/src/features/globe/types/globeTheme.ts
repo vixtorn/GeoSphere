@@ -1,0 +1,1 @@
+export type GlobeTheme = "day" | "night";

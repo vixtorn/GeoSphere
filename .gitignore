@@ -370,3 +370,6 @@ client/dist/
 
 **/bin/
 **/obj/
+
+
+client/public/textures/*.tif

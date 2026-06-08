@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Globe from "react-globe.gl";
 import type { Coordinates } from "../types/coordinates";
+import type { GlobeTheme } from "../types/globeTheme";
+
+const MIN_CAMERA_DISTANCE = 110;
+const MAX_CAMERA_DISTANCE = 900;
 
 type GlobeMarker = Coordinates & {
   id: string;
@@ -10,12 +14,14 @@ type GlobeMarker = Coordinates & {
 type InteractiveGlobeProps = {
   selectedCoordinates: Coordinates | null;
   isDataMode: boolean;
+  globeTheme: GlobeTheme;
   onCoordinateSelect: (coordinates: Coordinates) => void;
 };
 
 export function InteractiveGlobe({
   selectedCoordinates,
   isDataMode,
+  globeTheme,
   onCoordinateSelect,
 }: InteractiveGlobeProps) {
   const globeRef = useRef<any>(undefined);
@@ -25,6 +31,11 @@ export function InteractiveGlobe({
     width: 900,
     height: 700,
   });
+
+  const globeImageUrl =
+    globeTheme === "day"
+      ? "/textures/earth-day-8k.jpg"
+      : "/textures/earth-night-8k.jpg";
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -46,14 +57,14 @@ export function InteractiveGlobe({
   useEffect(() => {
     if (!globeRef.current) return;
 
-  const controls = globeRef.current.controls();
+    const controls = globeRef.current.controls();
 
-controls.autoRotate = !isDataMode;
-controls.autoRotateSpeed = 0.35;
-controls.enableDamping = true;
+    controls.autoRotate = !isDataMode;
+    controls.autoRotateSpeed = 0.35;
+    controls.enableDamping = true;
 
-controls.minDistance = 110;
-controls.maxDistance = 900;
+    controls.minDistance = MIN_CAMERA_DISTANCE;
+    controls.maxDistance = MAX_CAMERA_DISTANCE;
   }, [isDataMode]);
 
   const markerData: GlobeMarker[] = useMemo(() => {
@@ -89,32 +100,32 @@ controls.maxDistance = 900;
 
   return (
     <div ref={containerRef} className="relative h-full w-full">
-  <Globe
-  ref={globeRef}
-  width={size.width}
-  height={size.height}
-  backgroundColor="rgba(0,0,0,0)"
-  globeImageUrl="/textures/earth-day-8k.jpg"
-  showAtmosphere
-  atmosphereColor="#67e8f9"
-  atmosphereAltitude={0.18}
-  showGraticules
-  onGlobeClick={handleGlobeClick}
-  pointsData={markerData}
-  pointLat="lat"
-  pointLng="lng"
-  pointAltitude={0.04}
-  pointRadius={0.35}
-  pointColor={() => "#f59e0b"}
-  pointLabel="label"
-  ringsData={markerData}
-  ringLat="lat"
-  ringLng="lng"
-  ringColor={() => "rgba(245, 158, 11, 0.75)"}
-  ringMaxRadius={5}
-  ringPropagationSpeed={2}
-  ringRepeatPeriod={900}
-/>
+      <Globe
+        ref={globeRef}
+        width={size.width}
+        height={size.height}
+        backgroundColor="rgba(0,0,0,0)"
+        globeImageUrl={globeImageUrl}
+        showAtmosphere
+        atmosphereColor="#67e8f9"
+        atmosphereAltitude={0.18}
+        showGraticules
+        onGlobeClick={handleGlobeClick}
+        pointsData={markerData}
+        pointLat="lat"
+        pointLng="lng"
+        pointAltitude={0.04}
+        pointRadius={0.35}
+        pointColor={() => "#f59e0b"}
+        pointLabel="label"
+        ringsData={markerData}
+        ringLat="lat"
+        ringLng="lng"
+        ringColor={() => "rgba(245, 158, 11, 0.75)"}
+        ringMaxRadius={5}
+        ringPropagationSpeed={2}
+        ringRepeatPeriod={900}
+      />
 
       <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-300/5 blur-3xl" />
     </div>

@@ -2,18 +2,25 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Search, UserCircle2 } from "lucide-react";
 import { useState } from "react";
 import { RightDashboardPanel } from "../features/dashboard/components/RightDashboardPanel";
+import { DayNightToggle } from "../features/globe/components/DayNightToggle";
 import { InteractiveGlobe } from "../features/globe/components/InteractiveGlobe";
 import type { Coordinates } from "../features/globe/types/coordinates";
+import type { GlobeTheme } from "../features/globe/types/globeTheme";
 
 export default function App() {
   const [selectedCoordinates, setSelectedCoordinates] =
     useState<Coordinates | null>(null);
 
+  const [globeTheme, setGlobeTheme] = useState<GlobeTheme>("day");
+
   const isDataMode = selectedCoordinates !== null;
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#020617] text-slate-100">
-      <TopNavigation />
+      <TopNavigation
+        globeTheme={globeTheme}
+        onGlobeThemeChange={setGlobeTheme}
+      />
 
       <main className="relative h-[calc(100vh-56px)] overflow-hidden bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.20),transparent_42%),linear-gradient(180deg,#020617,#030712)]">
         <motion.section
@@ -46,16 +53,17 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
               >
                 <div className="rounded-full border border-cyan-300/15 bg-slate-950/40 px-5 py-2 backdrop-blur-xl">
-  <p className="text-sm uppercase tracking-[0.28em] text-cyan-100/80">
-    Click a location on the globe to discover geospatial data
-  </p>
-</div>
+                  <p className="text-sm uppercase tracking-[0.28em] text-cyan-100/80">
+                    Click a location on the globe to discover geospatial data
+                  </p>
+                </div>
               </motion.div>
             )}
 
             <InteractiveGlobe
               selectedCoordinates={selectedCoordinates}
               isDataMode={isDataMode}
+              globeTheme={globeTheme}
               onCoordinateSelect={setSelectedCoordinates}
             />
           </motion.div>
@@ -75,9 +83,9 @@ export default function App() {
               }}
             >
               <RightDashboardPanel
-  coordinates={selectedCoordinates}
-  onClose={() => setSelectedCoordinates(null)}
-/>
+                coordinates={selectedCoordinates}
+                onClose={() => setSelectedCoordinates(null)}
+              />
             </motion.aside>
           )}
         </AnimatePresence>
@@ -86,7 +94,15 @@ export default function App() {
   );
 }
 
-function TopNavigation() {
+type TopNavigationProps = {
+  globeTheme: GlobeTheme;
+  onGlobeThemeChange: (value: GlobeTheme) => void;
+};
+
+function TopNavigation({
+  globeTheme,
+  onGlobeThemeChange,
+}: TopNavigationProps) {
   return (
     <header className="flex h-14 items-center justify-between border-b border-cyan-300/10 bg-slate-950/70 px-6 backdrop-blur-xl">
       <div className="flex items-center gap-3">
@@ -103,6 +119,7 @@ function TopNavigation() {
       </div>
 
       <div className="flex items-center gap-5 text-sm text-slate-300">
+        <DayNightToggle value={globeTheme} onChange={onGlobeThemeChange} />
         <button className="hover:text-cyan-100">About</button>
         <UserCircle2 size={24} />
       </div>
