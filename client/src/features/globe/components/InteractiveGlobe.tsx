@@ -52,7 +52,7 @@ controls.autoRotate = !isDataMode;
 controls.autoRotateSpeed = 0.35;
 controls.enableDamping = true;
 
-controls.minDistance = 220;
+controls.minDistance = 110;
 controls.maxDistance = 900;
   }, [isDataMode]);
 
@@ -94,7 +94,7 @@ controls.maxDistance = 900;
   width={size.width}
   height={size.height}
   backgroundColor="rgba(0,0,0,0)"
-  globeImageUrl="/textures/earth-day-2k.jpg"
+  globeImageUrl="/textures/earth-day-8k.jpg"
   showAtmosphere
   atmosphereColor="#67e8f9"
   atmosphereAltitude={0.18}
