@@ -1,4 +1,5 @@
 ﻿using GeoSphere.Application.DTOs.FavoriteLocations;
+using GeoSphere.Domain.Entities;
 using GeoSphere.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,5 +37,68 @@ public sealed class FavoriteLocationsController : ControllerBase
             .ToList();
 
         return Ok(response);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<FavoriteLocationDto>> CreateFavoriteLocation(
+        [FromBody] CreateFavoriteLocationRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return BadRequest("Favorite location name cannot be empty.");
+        }
+
+        if (!IsValidLatitude(request.Latitude) || !IsValidLongitude(request.Longitude))
+        {
+            return BadRequest("Latitude must be between -90 and 90. Longitude must be between -180 and 180.");
+        }
+
+        var normalizedName = request.Name.Trim();
+
+        var alreadyExists = await _dbContext.FavoriteLocations
+            .AnyAsync(
+                location =>
+                    location.Latitude == request.Latitude &&
+                    location.Longitude == request.Longitude,
+                cancellationToken);
+
+        if (alreadyExists)
+        {
+            return Conflict("This location is already saved.");
+        }
+
+        var favoriteLocation = new FavoriteLocation(
+            normalizedName,
+            request.Latitude,
+            request.Longitude);
+
+        _dbContext.FavoriteLocations.Add(favoriteLocation);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var response = new FavoriteLocationDto
+        {
+            Id = favoriteLocation.Id,
+            Name = favoriteLocation.Name,
+            Latitude = favoriteLocation.Latitude,
+            Longitude = favoriteLocation.Longitude,
+            CreatedAtUtc = favoriteLocation.CreatedAtUtc
+        };
+
+        return CreatedAtAction(
+            nameof(GetFavoriteLocations),
+            new { id = response.Id },
+            response);
+    }
+
+    private static bool IsValidLatitude(double latitude)
+    {
+        return latitude >= -90 && latitude <= 90;
+    }
+
+    private static bool IsValidLongitude(double longitude)
+    {
+        return longitude >= -180 && longitude <= 180;
     }
 }
