@@ -14,7 +14,7 @@ public sealed class WeatherController : ControllerBase
     {
         _weatherService = weatherService;
     }
-    https://api.open-meteo.com/v1/forecast?latitude=39.83518&longitude=35.80657&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,pressure_msl,weather_code&timezone=auto
+
     [HttpGet("current")]
     public async Task<ActionResult<CurrentWeatherDto>> GetCurrentWeather(
         [FromQuery] double lat,
