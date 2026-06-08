@@ -1,4 +1,5 @@
-﻿using GeoSphere.Application.DTOs.Geospatial;
+﻿using GeoSphere.Application.Abstractions.Geospatial;
+using GeoSphere.Application.DTOs.Geospatial;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeoSphere.Api.Controllers;
@@ -7,28 +8,28 @@ namespace GeoSphere.Api.Controllers;
 [Route("api/geospatial")]
 public sealed class GeospatialController : ControllerBase
 {
+    private readonly IGeospatialService _geospatialService;
+
+    public GeospatialController(IGeospatialService geospatialService)
+    {
+        _geospatialService = geospatialService;
+    }
+
     [HttpGet("location")]
-    public ActionResult<GeospatialLocationDto> GetLocationData(
+    public async Task<ActionResult<GeospatialLocationDto>> GetLocationData(
         [FromQuery] double lat,
-        [FromQuery] double lng)
+        [FromQuery] double lng,
+        CancellationToken cancellationToken)
     {
         if (!IsValidLatitude(lat) || !IsValidLongitude(lng))
         {
             return BadRequest("Latitude must be between -90 and 90. Longitude must be between -180 and 180.");
         }
 
-        var response = new GeospatialLocationDto
-        {
-            Latitude = lat,
-            Longitude = lng,
-            Country = "Mock Country",
-            City = "Mock City",
-            Region = "Mock Region",
-            ElevationMeters = 35,
-            TerrainType = "Coastal",
-            SettlementType = "Urban",
-            RetrievedAtUtc = DateTimeOffset.UtcNow
-        };
+        var response = await _geospatialService.GetLocationDataAsync(
+            lat,
+            lng,
+            cancellationToken);
 
         return Ok(response);
     }
