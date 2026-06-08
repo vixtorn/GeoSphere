@@ -373,3 +373,7 @@ client/dist/
 
 
 client/public/textures/*.tif
+
+*.db
+*.db-shm
+*.db-wal

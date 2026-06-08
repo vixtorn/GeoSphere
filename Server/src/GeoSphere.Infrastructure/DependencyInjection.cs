@@ -2,14 +2,26 @@
 using GeoSphere.Application.Abstractions.Weather;
 using GeoSphere.Infrastructure.ExternalApis.Geospatial;
 using GeoSphere.Infrastructure.ExternalApis.OpenMeteo;
+using GeoSphere.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GeoSphere.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("GeoSphereDatabase");
+
+        services.AddDbContext<GeoSphereDbContext>(options =>
+        {
+            options.UseSqlite(connectionString);
+        });
+
         services.AddMemoryCache();
 
         services.AddHttpClient<IWeatherService, OpenMeteoWeatherService>(client =>

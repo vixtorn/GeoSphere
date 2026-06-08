@@ -1,5 +1,7 @@
 ﻿using GeoSphere.Application.DTOs.FavoriteLocations;
+using GeoSphere.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GeoSphere.Api.Controllers;
 
@@ -7,36 +9,31 @@ namespace GeoSphere.Api.Controllers;
 [Route("api/favorite-locations")]
 public sealed class FavoriteLocationsController : ControllerBase
 {
-    [HttpGet]
-    public ActionResult<IReadOnlyList<FavoriteLocationDto>> GetFavoriteLocations()
+    private readonly GeoSphereDbContext _dbContext;
+
+    public FavoriteLocationsController(GeoSphereDbContext dbContext)
     {
-        var response = new List<FavoriteLocationDto>
-        {
-            new()
+        _dbContext = dbContext;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<FavoriteLocationDto>>> GetFavoriteLocations(
+        CancellationToken cancellationToken)
+    {
+        var locations = await _dbContext.FavoriteLocations
+            .Select(location => new FavoriteLocationDto
             {
-                Id = Guid.NewGuid(),
-                Name = "Istanbul",
-                Latitude = 41.0082,
-                Longitude = 28.9784,
-                CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-3)
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Berlin",
-                Latitude = 52.52,
-                Longitude = 13.405,
-                CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-2)
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Tokyo",
-                Latitude = 35.6762,
-                Longitude = 139.6503,
-                CreatedAtUtc = DateTimeOffset.UtcNow.AddDays(-1)
-            }
-        };
+                Id = location.Id,
+                Name = location.Name,
+                Latitude = location.Latitude,
+                Longitude = location.Longitude,
+                CreatedAtUtc = location.CreatedAtUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        var response = locations
+            .OrderByDescending(location => location.CreatedAtUtc)
+            .ToList();
 
         return Ok(response);
     }
