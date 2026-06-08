@@ -46,11 +46,14 @@ export function InteractiveGlobe({
   useEffect(() => {
     if (!globeRef.current) return;
 
-    const controls = globeRef.current.controls();
+  const controls = globeRef.current.controls();
 
-    controls.autoRotate = !isDataMode;
-    controls.autoRotateSpeed = 0.35;
-    controls.enableDamping = true;
+controls.autoRotate = !isDataMode;
+controls.autoRotateSpeed = 0.35;
+controls.enableDamping = true;
+
+controls.minDistance = 220;
+controls.maxDistance = 900;
   }, [isDataMode]);
 
   const markerData: GlobeMarker[] = useMemo(() => {
@@ -86,33 +89,32 @@ export function InteractiveGlobe({
 
   return (
     <div ref={containerRef} className="relative h-full w-full">
-      <Globe
-        ref={globeRef}
-        width={size.width}
-        height={size.height}
-        backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-        showAtmosphere
-        atmosphereColor="#67e8f9"
-        atmosphereAltitude={0.18}
-        showGraticules
-        onGlobeClick={handleGlobeClick}
-        pointsData={markerData}
-        pointLat="lat"
-        pointLng="lng"
-        pointAltitude={0.04}
-        pointRadius={0.35}
-        pointColor={() => "#f59e0b"}
-        pointLabel="label"
-        ringsData={markerData}
-        ringLat="lat"
-        ringLng="lng"
-        ringColor={() => "rgba(245, 158, 11, 0.75)"}
-        ringMaxRadius={5}
-        ringPropagationSpeed={2}
-        ringRepeatPeriod={900}
-      />
+  <Globe
+  ref={globeRef}
+  width={size.width}
+  height={size.height}
+  backgroundColor="rgba(0,0,0,0)"
+  globeImageUrl="/textures/earth-day-2k.jpg"
+  showAtmosphere
+  atmosphereColor="#67e8f9"
+  atmosphereAltitude={0.18}
+  showGraticules
+  onGlobeClick={handleGlobeClick}
+  pointsData={markerData}
+  pointLat="lat"
+  pointLng="lng"
+  pointAltitude={0.04}
+  pointRadius={0.35}
+  pointColor={() => "#f59e0b"}
+  pointLabel="label"
+  ringsData={markerData}
+  ringLat="lat"
+  ringLng="lng"
+  ringColor={() => "rgba(245, 158, 11, 0.75)"}
+  ringMaxRadius={5}
+  ringPropagationSpeed={2}
+  ringRepeatPeriod={900}
+/>
 
       <div className="pointer-events-none absolute inset-0 rounded-full bg-cyan-300/5 blur-3xl" />
     </div>
