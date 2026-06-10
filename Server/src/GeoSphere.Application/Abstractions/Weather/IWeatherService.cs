@@ -7,5 +7,10 @@ public interface IWeatherService
     Task<CurrentWeatherDto> GetCurrentWeatherAsync(
         double latitude,
         double longitude,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken);
+
+    Task<WeatherForecastDto> GetForecastAsync(
+        double latitude,
+        double longitude,
+        CancellationToken cancellationToken);
 }

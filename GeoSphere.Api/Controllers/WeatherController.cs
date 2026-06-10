@@ -34,6 +34,25 @@ public sealed class WeatherController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("forecast")]
+    public async Task<ActionResult<WeatherForecastDto>> GetForecast(
+        [FromQuery] double lat,
+        [FromQuery] double lng,
+        CancellationToken cancellationToken)
+    {
+        if (!IsValidLatitude(lat) || !IsValidLongitude(lng))
+        {
+            return BadRequest("Latitude must be between -90 and 90. Longitude must be between -180 and 180.");
+        }
+
+        var response = await _weatherService.GetForecastAsync(
+            lat,
+            lng,
+            cancellationToken);
+
+        return Ok(response);
+    }
+
     private static bool IsValidLatitude(double latitude)
     {
         return latitude >= -90 && latitude <= 90;

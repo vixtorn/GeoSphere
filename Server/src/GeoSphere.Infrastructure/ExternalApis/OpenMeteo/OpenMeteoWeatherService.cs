@@ -58,6 +58,100 @@ public sealed class OpenMeteoWeatherService : IWeatherService
         };
     }
 
+    public async Task<WeatherForecastDto> GetForecastAsync(
+        double latitude,
+        double longitude,
+        CancellationToken cancellationToken)
+    {
+        if (!IsValidLatitude(latitude) || !IsValidLongitude(longitude))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(latitude),
+                "Latitude must be between -90 and 90. Longitude must be between -180 and 180.");
+        }
+
+        var lat = latitude.ToString(CultureInfo.InvariantCulture);
+        var lng = longitude.ToString(CultureInfo.InvariantCulture);
+
+        var endpoint =
+            $"v1/forecast?latitude={lat}&longitude={lng}" +
+            "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max" +
+            "&timezone=auto" +
+            "&forecast_days=5";
+
+        var response = await _httpClient.GetFromJsonAsync<OpenMeteoForecastResponse>(
+            endpoint,
+            cancellationToken);
+
+        if (response is null)
+        {
+            throw new InvalidOperationException("Open-Meteo forecast response was empty.");
+        }
+
+        var daily = response.Daily;
+        var dailyForecasts = new List<DailyForecastDto>();
+
+        for (var index = 0; index < daily.Time.Count; index++)
+        {
+            var weatherCode = GetValueOrDefault(daily.WeatherCodes, index, 0);
+
+            dailyForecasts.Add(new DailyForecastDto
+            {
+                Date = GetValueOrDefault(daily.Time, index, string.Empty),
+                TemperatureMaxCelsius = GetValueOrDefault(
+                    daily.TemperatureMaxCelsius,
+                    index,
+                    0),
+                TemperatureMinCelsius = GetValueOrDefault(
+                    daily.TemperatureMinCelsius,
+                    index,
+                    0),
+                PrecipitationProbabilityMaxPercentage = GetNullableValueOrDefault(
+                    daily.PrecipitationProbabilityMaxPercentage,
+                    index),
+                WindSpeedMaxKmh = GetValueOrDefault(
+                    daily.WindSpeedMaxKmh,
+                    index,
+                    0),
+                WeatherCode = weatherCode,
+                Condition = MapWeatherCode(weatherCode)
+            });
+        }
+
+        return new WeatherForecastDto
+        {
+            Latitude = response.Latitude,
+            Longitude = response.Longitude,
+            DailyForecasts = dailyForecasts,
+            RetrievedAtUtc = DateTimeOffset.UtcNow
+        };
+    }
+
+    private static T GetValueOrDefault<T>(
+        IReadOnlyList<T> values,
+        int index,
+        T fallbackValue)
+    {
+        if (index < 0 || index >= values.Count)
+        {
+            return fallbackValue;
+        }
+
+        return values[index];
+    }
+
+    private static int GetNullableValueOrDefault(
+        IReadOnlyList<int?> values,
+        int index)
+    {
+        if (index < 0 || index >= values.Count)
+        {
+            return 0;
+        }
+
+        return values[index] ?? 0;
+    }
+
     private static string MapWeatherCode(int weatherCode)
     {
         return weatherCode switch
