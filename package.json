@@ -1,0 +1,13 @@
+{
+  "name": "geosphere",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n API,CLIENT \"dotnet run --project ./GeoSphere.Api/GeoSphere.Api.csproj\" \"npm --prefix ./client run dev\"",
+    "dev:api": "dotnet run --project ./GeoSphere.Api/GeoSphere.Api.csproj",
+    "dev:client": "npm --prefix ./client run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
