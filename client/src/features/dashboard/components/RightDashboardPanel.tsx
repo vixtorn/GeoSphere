@@ -24,11 +24,13 @@ import { WeatherTab } from "./WeatherTab";
 
 type RightDashboardPanelProps = {
   coordinates: Coordinates;
+  onLocationSelect: (coordinates: Coordinates) => void;
   onClose: () => void;
 };
 
 export function RightDashboardPanel({
   coordinates,
+  onLocationSelect,
   onClose,
 }: RightDashboardPanelProps) {
   const [activeTab, setActiveTab] = useState<DashboardTab>("weather");
@@ -243,6 +245,15 @@ export function RightDashboardPanel({
     }
   }
 
+function handleSelectFavoriteLocation(location: FavoriteLocationDto) {
+  onLocationSelect({
+    lat: Number(location.latitude.toFixed(5)),
+    lng: Number(location.longitude.toFixed(5)),
+  });
+
+  setActiveTab("weather");
+}
+
   return (
     <section className="h-full overflow-y-auto rounded-2xl border border-cyan-300/15 bg-slate-950/55 p-5 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur-xl">
       <header className="mb-5 flex items-start justify-between gap-4 border-l-4 border-amber-400 pl-4">
@@ -315,12 +326,13 @@ export function RightDashboardPanel({
 
         {activeTab === "saved" && (
           <SavedLocationsTab
-            favoriteLocations={favoriteLocations}
-            isLoading={isFavoritesLoading}
-            error={favoritesError}
-            deletingFavoriteId={deletingFavoriteId}
-            onDeleteFavoriteLocation={handleDeleteFavoriteLocation}
-          />
+  favoriteLocations={favoriteLocations}
+  isLoading={isFavoritesLoading}
+  error={favoritesError}
+  deletingFavoriteId={deletingFavoriteId}
+  onSelectFavoriteLocation={handleSelectFavoriteLocation}
+  onDeleteFavoriteLocation={handleDeleteFavoriteLocation}
+/>
         )}
       </div>
     </section>

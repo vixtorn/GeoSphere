@@ -85,9 +85,10 @@ export default function App() {
               }}
             >
               <RightDashboardPanel
-                coordinates={selectedCoordinates}
-                onClose={() => setSelectedCoordinates(null)}
-              />
+  coordinates={selectedCoordinates}
+  onLocationSelect={setSelectedCoordinates}
+  onClose={() => setSelectedCoordinates(null)}
+/>
             </motion.aside>
           )}
         </AnimatePresence>

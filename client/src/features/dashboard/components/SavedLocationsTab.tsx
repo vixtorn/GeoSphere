@@ -10,6 +10,7 @@ type SavedLocationsTabProps = {
   isLoading: boolean;
   error: string | null;
   deletingFavoriteId: string | null;
+  onSelectFavoriteLocation: (location: FavoriteLocationDto) => void;
   onDeleteFavoriteLocation: (id: string) => void;
 };
 
@@ -18,6 +19,7 @@ export function SavedLocationsTab({
   isLoading,
   error,
   deletingFavoriteId,
+  onSelectFavoriteLocation,
   onDeleteFavoriteLocation,
 }: SavedLocationsTabProps) {
   if (isLoading) {
@@ -50,16 +52,23 @@ export function SavedLocationsTab({
               className="rounded-lg border border-white/10 bg-white/[0.03] p-3"
             >
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium text-slate-100">
-                    {location.name}
-                  </p>
+                <button
+  type="button"
+  onClick={() => onSelectFavoriteLocation(location)}
+  className="min-w-0 flex-1 text-left"
+>
+  <p className="font-medium text-slate-100 transition hover:text-cyan-100">
+    {location.name}
+  </p>
 
-                  <p className="mt-1 font-mono text-xs text-cyan-100">
-                    {location.latitude.toFixed(4)},{" "}
-                    {location.longitude.toFixed(4)}
-                  </p>
-                </div>
+  <p className="mt-1 font-mono text-xs text-cyan-100">
+    {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+  </p>
+
+  <p className="mt-1 text-xs text-slate-500">
+    Click to navigate
+  </p>
+</button>
 
                 <button
                   type="button"
