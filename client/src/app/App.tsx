@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, UserCircle2 } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 import { useState } from "react";
 import { RightDashboardPanel } from "../features/dashboard/components/RightDashboardPanel";
+import { LocationSearch } from "../features/geospatial/components/LocationSearch";
 import { DayNightToggle } from "../features/globe/components/DayNightToggle";
 import { InteractiveGlobe } from "../features/globe/components/InteractiveGlobe";
 import type { Coordinates } from "../features/globe/types/coordinates";
@@ -20,6 +21,7 @@ export default function App() {
       <TopNavigation
         globeTheme={globeTheme}
         onGlobeThemeChange={setGlobeTheme}
+        onLocationSelect={setSelectedCoordinates}
       />
 
       <main className="relative h-[calc(100vh-56px)] overflow-hidden bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.20),transparent_42%),linear-gradient(180deg,#020617,#030712)]">
@@ -97,14 +99,16 @@ export default function App() {
 type TopNavigationProps = {
   globeTheme: GlobeTheme;
   onGlobeThemeChange: (value: GlobeTheme) => void;
+  onLocationSelect: (coordinates: Coordinates) => void;
 };
 
 function TopNavigation({
   globeTheme,
   onGlobeThemeChange,
+  onLocationSelect,
 }: TopNavigationProps) {
   return (
-    <header className="flex h-14 items-center justify-between border-b border-cyan-300/10 bg-slate-950/70 px-6 backdrop-blur-xl">
+    <header className="relative z-50 flex h-14 items-center justify-between border-b border-cyan-300/10 bg-slate-950/70 px-6 backdrop-blur-xl">
       <div className="flex items-center gap-3">
         <div className="grid h-8 w-8 place-items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
           🌐
@@ -113,10 +117,7 @@ function TopNavigation({
         <span className="font-semibold tracking-wide">GEOSPHERE WEATHER</span>
       </div>
 
-      <div className="hidden w-[320px] items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-slate-400 md:flex">
-        <Search size={16} />
-        <span className="text-sm">Search Location...</span>
-      </div>
+      <LocationSearch onLocationSelect={onLocationSelect} />
 
       <div className="flex items-center gap-5 text-sm text-slate-300">
         <DayNightToggle value={globeTheme} onChange={onGlobeThemeChange} />

@@ -67,6 +67,19 @@ export function InteractiveGlobe({
     controls.maxDistance = MAX_CAMERA_DISTANCE;
   }, [isDataMode]);
 
+  useEffect(() => {
+    if (!globeRef.current || !selectedCoordinates) return;
+
+    globeRef.current.pointOfView(
+      {
+        lat: selectedCoordinates.lat,
+        lng: selectedCoordinates.lng,
+        altitude: 0.8,
+      },
+      1000
+    );
+  }, [selectedCoordinates]);
+
   const markerData: GlobeMarker[] = useMemo(() => {
     if (!selectedCoordinates) return [];
 
@@ -87,15 +100,6 @@ export function InteractiveGlobe({
     };
 
     onCoordinateSelect(coordinates);
-
-    globeRef.current?.pointOfView(
-      {
-        lat: coordinates.lat,
-        lng: coordinates.lng,
-        altitude: 1.7,
-      },
-      1000
-    );
   }
 
   return (
