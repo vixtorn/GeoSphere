@@ -47,3 +47,12 @@ export type WeatherForecastDto = {
   dailyForecasts: DailyForecastDto[];
   retrievedAtUtc: string;
 };
+
+export type GeospatialSearchResultDto = {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  city: string;
+  region: string;
+};
