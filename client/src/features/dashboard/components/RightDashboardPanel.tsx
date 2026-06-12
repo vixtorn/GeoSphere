@@ -1,22 +1,26 @@
 import { BookmarkPlus, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { Coordinates } from "../../globe/types/coordinates";
-import { DashboardTabs, type DashboardTab } from "./DashboardTabs";
-import { GeospatialTab } from "./GeospatialTab";
-import { SavedLocationsTab } from "./SavedLocationsTab";
-import { WeatherTab } from "./WeatherTab";
-import { getCurrentWeather } from "../../../services/api/weatherApi";
-import { getGeospatialLocation } from "../../../services/api/geospatialApi";
+import type {
+  CurrentWeatherDto,
+  FavoriteLocationDto,
+  GeospatialLocationDto,
+  WeatherForecastDto,
+} from "../../../services/api/apiTypes";
 import {
   createFavoriteLocation,
   deleteFavoriteLocation,
   getFavoriteLocations,
 } from "../../../services/api/favoriteLocationsApi";
-import type {
-  CurrentWeatherDto,
-  FavoriteLocationDto,
-  GeospatialLocationDto,
-} from "../../../services/api/apiTypes";
+import { getGeospatialLocation } from "../../../services/api/geospatialApi";
+import {
+  getCurrentWeather,
+  getWeatherForecast,
+} from "../../../services/api/weatherApi";
+import type { Coordinates } from "../../globe/types/coordinates";
+import { DashboardTabs, type DashboardTab } from "./DashboardTabs";
+import { GeospatialTab } from "./GeospatialTab";
+import { SavedLocationsTab } from "./SavedLocationsTab";
+import { WeatherTab } from "./WeatherTab";
 
 type RightDashboardPanelProps = {
   coordinates: Coordinates;
@@ -30,6 +34,7 @@ export function RightDashboardPanel({
   const [activeTab, setActiveTab] = useState<DashboardTab>("weather");
 
   const [weather, setWeather] = useState<CurrentWeatherDto | null>(null);
+  const [forecast, setForecast] = useState<WeatherForecastDto | null>(null);
   const [geospatial, setGeospatial] =
     useState<GeospatialLocationDto | null>(null);
   const [favoriteLocations, setFavoriteLocations] = useState<
@@ -37,6 +42,7 @@ export function RightDashboardPanel({
   >([]);
 
   const [isWeatherLoading, setIsWeatherLoading] = useState(false);
+  const [isForecastLoading, setIsForecastLoading] = useState(false);
   const [isGeospatialLoading, setIsGeospatialLoading] = useState(false);
   const [isFavoritesLoading, setIsFavoritesLoading] = useState(false);
 
@@ -46,6 +52,7 @@ export function RightDashboardPanel({
   );
 
   const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [forecastError, setForecastError] = useState<string | null>(null);
   const [geospatialError, setGeospatialError] = useState<string | null>(null);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
   const [saveFavoriteError, setSaveFavoriteError] = useState<string | null>(
@@ -79,6 +86,37 @@ export function RightDashboardPanel({
     }
 
     loadWeather();
+
+    return () => controller.abort();
+  }, [coordinates]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadForecast() {
+      try {
+        setIsForecastLoading(true);
+        setForecastError(null);
+
+        const data = await getWeatherForecast(coordinates, controller.signal);
+
+        setForecast(data);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+
+        setForecastError(
+          error instanceof Error
+            ? error.message
+            : "Forecast data could not be loaded."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsForecastLoading(false);
+        }
+      }
+    }
+
+    loadForecast();
 
     return () => controller.abort();
   }, [coordinates]);
@@ -150,7 +188,8 @@ export function RightDashboardPanel({
 
   const isCurrentLocationSaved = favoriteLocations.some(
     (location) =>
-      location.latitude === coordinates.lat && location.longitude === coordinates.lng
+      location.latitude === coordinates.lat &&
+      location.longitude === coordinates.lng
   );
 
   async function handleSaveFavorite() {
@@ -258,8 +297,11 @@ export function RightDashboardPanel({
         {activeTab === "weather" && (
           <WeatherTab
             weather={weather}
+            forecast={forecast}
             isLoading={isWeatherLoading}
+            isForecastLoading={isForecastLoading}
             error={weatherError}
+            forecastError={forecastError}
           />
         )}
 

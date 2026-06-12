@@ -30,3 +30,20 @@ export type FavoriteLocationDto = {
   longitude: number;
   createdAtUtc: string;
 };
+
+export type DailyForecastDto = {
+  date: string;
+  temperatureMaxCelsius: number;
+  temperatureMinCelsius: number;
+  precipitationProbabilityMaxPercentage: number;
+  windSpeedMaxKmh: number;
+  weatherCode: number;
+  condition: string;
+};
+
+export type WeatherForecastDto = {
+  latitude: number;
+  longitude: number;
+  dailyForecasts: DailyForecastDto[];
+  retrievedAtUtc: string;
+};
