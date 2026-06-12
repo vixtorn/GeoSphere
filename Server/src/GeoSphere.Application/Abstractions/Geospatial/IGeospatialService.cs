@@ -7,5 +7,9 @@ public interface IGeospatialService
     Task<GeospatialLocationDto> GetLocationDataAsync(
         double latitude,
         double longitude,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<GeospatialSearchResultDto>> SearchLocationsAsync(
+        string query,
+        CancellationToken cancellationToken);
 }

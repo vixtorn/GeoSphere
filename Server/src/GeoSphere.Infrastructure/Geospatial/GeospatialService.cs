@@ -81,6 +81,59 @@ public sealed class GeospatialService : IGeospatialService
         return result;
     }
 
+    public async Task<IReadOnlyList<GeospatialSearchResultDto>> SearchLocationsAsync(
+        string query,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return Array.Empty<GeospatialSearchResultDto>();
+        }
+
+        var normalizedQuery = query.Trim();
+
+        if (normalizedQuery.Length < 2)
+        {
+            return Array.Empty<GeospatialSearchResultDto>();
+        }
+
+        await WaitForNominatimRateLimitAsync(cancellationToken);
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient("Nominatim");
+
+            var endpoint =
+                "search" +
+                $"?q={Uri.EscapeDataString(normalizedQuery)}" +
+                "&format=jsonv2" +
+                "&addressdetails=1" +
+                "&limit=5" +
+                "&accept-language=en";
+
+            var response = await client.GetFromJsonAsync<List<NominatimSearchResponse>>(
+                endpoint,
+                cancellationToken);
+
+            _lastNominatimRequestUtc = DateTimeOffset.UtcNow;
+
+            if (response is null || response.Count == 0)
+            {
+                return Array.Empty<GeospatialSearchResultDto>();
+            }
+
+            return response
+                .Select(MapToSearchResult)
+                .Where(result => result is not null)
+                .Select(result => result!)
+                .ToList();
+        }
+        finally
+        {
+            NominatimRateLimiter.Release();
+        }
+    }
+
     private async Task<double> GetElevationAsync(
         double latitude,
         double longitude,
@@ -110,17 +163,10 @@ public sealed class GeospatialService : IGeospatialService
         double longitude,
         CancellationToken cancellationToken)
     {
-        await NominatimRateLimiter.WaitAsync(cancellationToken);
+        await WaitForNominatimRateLimitAsync(cancellationToken);
 
         try
         {
-            var elapsed = DateTimeOffset.UtcNow - _lastNominatimRequestUtc;
-
-            if (elapsed < TimeSpan.FromSeconds(1))
-            {
-                await Task.Delay(TimeSpan.FromSeconds(1) - elapsed, cancellationToken);
-            }
-
             var client = _httpClientFactory.CreateClient("Nominatim");
 
             var lat = latitude.ToString(CultureInfo.InvariantCulture);
@@ -142,6 +188,60 @@ public sealed class GeospatialService : IGeospatialService
         {
             NominatimRateLimiter.Release();
         }
+    }
+
+    private static async Task WaitForNominatimRateLimitAsync(
+        CancellationToken cancellationToken)
+    {
+        await NominatimRateLimiter.WaitAsync(cancellationToken);
+
+        var elapsed = DateTimeOffset.UtcNow - _lastNominatimRequestUtc;
+
+        if (elapsed < TimeSpan.FromSeconds(1))
+        {
+            await Task.Delay(TimeSpan.FromSeconds(1) - elapsed, cancellationToken);
+        }
+    }
+
+    private static GeospatialSearchResultDto? MapToSearchResult(
+        NominatimSearchResponse response)
+    {
+        if (!double.TryParse(
+                response.Latitude,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out var latitude))
+        {
+            return null;
+        }
+
+        if (!double.TryParse(
+                response.Longitude,
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out var longitude))
+        {
+            return null;
+        }
+
+        var city = GetSearchCityName(response.Address);
+        var country = response.Address.Country ?? "Unknown Country";
+        var region = response.Address.State ?? "Unknown Region";
+
+        var name = BuildSearchResultName(
+            response.DisplayName,
+            city,
+            country);
+
+        return new GeospatialSearchResultDto
+        {
+            Name = name,
+            Latitude = latitude,
+            Longitude = longitude,
+            Country = country,
+            City = city,
+            Region = region
+        };
     }
 
     private static string BuildCacheKey(double latitude, double longitude)
@@ -220,6 +320,34 @@ public sealed class GeospatialService : IGeospatialService
             < 1500 => "Highland",
             _ => "Mountainous"
         };
+    }
+
+    private static string GetSearchCityName(NominatimSearchAddress address)
+    {
+        return GetFirstNonEmpty(
+            address.City,
+            address.Town,
+            address.Village,
+            address.Municipality,
+            "Unknown Location");
+    }
+
+    private static string BuildSearchResultName(
+        string displayName,
+        string city,
+        string country)
+    {
+        if (city != "Unknown Location" && country != "Unknown Country")
+        {
+            return $"{city}, {country}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(displayName))
+        {
+            return displayName;
+        }
+
+        return "Unknown Location";
     }
 
     private static string GetValueOrFallback(string? value, string fallback)

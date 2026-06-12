@@ -34,6 +34,28 @@ public sealed class GeospatialController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("search")]
+    public async Task<ActionResult<IReadOnlyList<GeospatialSearchResultDto>>> SearchLocations(
+        [FromQuery] string query,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return BadRequest("Search query cannot be empty.");
+        }
+
+        if (query.Trim().Length < 2)
+        {
+            return BadRequest("Search query must be at least 2 characters long.");
+        }
+
+        var response = await _geospatialService.SearchLocationsAsync(
+            query,
+            cancellationToken);
+
+        return Ok(response);
+    }
+
     private static bool IsValidLatitude(double latitude)
     {
         return latitude >= -90 && latitude <= 90;
