@@ -377,3 +377,62 @@ client/public/textures/*.tif
 *.db
 *.db-shm
 *.db-wal
+
+# -------------------------------
+
+# GeoSphere project-specific ignores
+
+# -------------------------------
+
+# Frontend environment files
+
+client/.env
+client/.env.*
+!client/.env.example
+
+# Generic environment files
+
+.env
+.env.*
+!.env.example
+
+# .NET local configuration files
+
+**/appsettings.Local.json
+**/appsettings.*.local.json
+**/appsettings.Development.local.json
+
+# Local SQLite database files
+
+*.db
+*.db-shm
+*.db-wal
+
+# Local build outputs
+
+client/dist/
+client/node_modules/
+**/bin/
+**/obj/
+.vs/
+**/.vs/
+
+# Large source/unused texture files
+
+client/public/textures/*.tif
+
+# Private keys / certificates / sensitive deployment files
+
+*.pfx
+*.p12
+*.pem
+*.key
+*.publishsettings
+*.pubxml
+*.azurePubxml
+
+# Local logs and temporary files
+
+*.log
+*.tmp
+*.temp
