@@ -196,9 +196,9 @@ function ForecastSkeleton() {
 }
 
 function formatForecastDate(date: string) {
-  return new Date(date).toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+    return new Date(date).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+    });
 }
