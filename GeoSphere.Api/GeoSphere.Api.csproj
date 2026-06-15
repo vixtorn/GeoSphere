@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+
+
   <ItemGroup>
     <ProjectReference Include="..\Server\src\GeoSphere.Application\GeoSphere.Application.csproj" />
     <ProjectReference Include="..\Server\src\GeoSphere.Infrastructure\GeoSphere.Infrastructure.csproj" />
